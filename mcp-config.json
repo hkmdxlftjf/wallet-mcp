@@ -1,11 +1,12 @@
 {
   "mcpServers": {
     "wallet-mcp": {
-      "command": "cargo",
-      "args": ["run", "--bin", "wallet-mcp"],
+      "command": "/Volumes/扩展/code/rust/wallet-mcp/target/release/wallet-mcp",
+      "args": [],
       "cwd": "/Volumes/扩展/code/rust/wallet-mcp",
       "env": {
-        "ETH_RPC_URL": "https://eth-mainnet.g.alchemy.com/v2/your-api-key"
+        "ETH_RPC_URL": "http://localhost:8545",
+        "PRIVATE_KEY": "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
       }
     }
   }

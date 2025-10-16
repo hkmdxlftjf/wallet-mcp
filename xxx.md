@@ -14,6 +14,12 @@ cast call 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 \
 ```
 
 ```angular2html
+cast call 0x2260fac5e5542a773aa44fbcfedf7c193bc2c599 \
+      "balanceOf(address)(uint256)" 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 \
+      --rpc-url http://127.0.0.1:8545
+```
+
+```angular2html
 cast call 0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2 \
       "balanceOf(address)(uint256)" 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 \
       --rpc-url http://127.0.0.1:8545
@@ -32,7 +38,6 @@ cast send 0x2260fac5e5542a773aa44fbcfedf7c193bc2c599 "deposit()" \
           --rpc-url http://127.0.0.1:8545 \
           --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 ```
-
 
 ```angular2html
 # 1 ETH 精确输入，滑点 0.5 %，池子费层 0.3 %
