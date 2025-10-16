@@ -1,9 +1,9 @@
-use alloy::primitives::Address;
-use tokio::io::{self, AsyncBufReadExt, AsyncWriteExt, BufReader};
-use serde::{Deserialize, Serialize};
-use alloy::providers::{Provider};
+use alloy::providers::Provider;
 use anyhow::Result;
-use crate::wallet::{SwapParams, Wallet};
+use serde::{Deserialize, Serialize};
+use tokio::io::{self, AsyncBufReadExt, AsyncWriteExt, BufReader};
+use crate::types::{GetBalanceRequest, GetTokenPriceRequest, SwapTokensRequest};
+use crate::wallet::WalletMcpServer;
 
 #[derive(Debug, Deserialize)]
 pub struct Request {
@@ -24,59 +24,66 @@ pub struct Server {}
 
 impl Server {
     pub async fn new() -> Result<Self> {
-        Ok(Self{})
+        Ok(Self {})
     }
 
-    pub async fn run(&self, rpc_url: String) -> anyhow::Result<()> {
+    pub async fn run(&self, rpc_url: String, private_key: String) -> anyhow::Result<()> {
         let stdin = io::stdin();
         let stdout = io::stdout();
         let mut writer = stdout;
         let reader = BufReader::new(stdin);
         let mut lines = reader.lines();
 
-        let wallet = Wallet::new(rpc_url);
+        let wallet = WalletMcpServer::new(rpc_url, private_key);
         while let Some(line) = lines.next_line().await? {
-            if line.trim().is_empty() { continue; }
+            if line.trim().is_empty() {
+                continue;
+            }
 
             let req: Request = match serde_json::from_str(&line) {
                 Ok(r) => r,
-                Err(e) => { eprintln!("Invalid JSON: {}", e); continue; }
+                Err(e) => {
+                    eprintln!("Invalid JSON: {}", e);
+                    continue;
+                }
             };
 
             let result = match req.method.as_str() {
                 "ping" => serde_json::json!({"message": "pong"}),
                 "get_balance" => {
-                    if let Some(params) = req.params.clone() {
-                        if let Some(addr) = params.get("address").and_then(|v| v.as_str()) {
-                            match wallet.get_balance(addr).await {
-                                Ok(b) => serde_json::json!({"balance": b}),
+                    match serde_json::from_value::<GetBalanceRequest>(
+                        req.params.clone().unwrap_or_default(),
+                    ) {
+                        Ok(params) => {
+                            // 直接传给 wallet.swap_tokens
+                            match wallet.get_balance(params).await {
+                                Ok(res) => serde_json::json!({"result": res}),
                                 Err(e) => serde_json::json!({"error": e.to_string()}),
                             }
-                        } else {
-                            serde_json::json!({"error": "missing address"})
                         }
-                    } else {
-                        serde_json::json!({"error": "missing params"})
+                        Err(_) => serde_json::json!({"error": "invalid parameters"}),
                     }
-                },
+                }
                 "get_token_price" => {
-                    if let Some(params) = req.params.clone() {
-                        if let Some(addr) = params.get("quote_address").and_then(|v| v.as_str()) {
-                            match wallet.get_token_price(addr.to_string()).await {
-                                Ok(b) => serde_json::json!({"balance": b}),
+                    match serde_json::from_value::<GetTokenPriceRequest>(
+                        req.params.clone().unwrap_or_default(),
+                    ) {
+                        Ok(params) => {
+                            // 直接传给 wallet.swap_tokens
+                            match wallet.get_token_price(params).await {
+                                Ok(res) => serde_json::json!({"result": res}),
                                 Err(e) => serde_json::json!({"error": e.to_string()}),
                             }
-                        } else {
-                            serde_json::json!({"error": "missing address"})
                         }
-                    } else {
-                        serde_json::json!({"error": "missing params"})
+                        Err(_) => serde_json::json!({"error": "invalid parameters"}),
                     }
-                },
+                }
                 // Handler
                 "swap_tokens" => {
                     // 反序列化参数
-                    match serde_json::from_value::<SwapParams>(req.params.clone().unwrap_or_default()) {
+                    match serde_json::from_value::<SwapTokensRequest>(
+                        req.params.clone().unwrap_or_default(),
+                    ) {
                         Ok(params) => {
                             // 直接传给 wallet.swap_tokens
                             match wallet.swap_tokens(params).await {
