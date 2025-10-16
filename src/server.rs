@@ -1,4 +1,3 @@
-use alloy::providers::Provider;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use tokio::io::{self, AsyncBufReadExt, AsyncWriteExt, BufReader};
