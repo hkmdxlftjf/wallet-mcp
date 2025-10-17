@@ -3,23 +3,37 @@ mod server;
 mod sol;
 mod types;
 mod wallet;
-
-use crate::server::Server;
+mod mcp;
 use anyhow::Result;
 use std::env;
+use rmcp::ServiceExt;
+use rmcp::transport::stdio;
+use rmcp::transport::streamable_http_server::{
+    StreamableHttpService, session::local::LocalSessionManager,
+};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter, {self}};
+use crate::mcp::Mcp;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let mut args = std::env::args().skip(1);
-    let port: u16 = args
-        .next()
-        .unwrap_or_else(|| "11111".to_string())
-        .parse()
-        .unwrap_or(11111);
-    dotenvy::dotenv().ok();
+    // Initialize the tracing subscriber with file and stdout logging
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env().add_directive(tracing::Level::DEBUG.into()))
+        .with_writer(std::io::stderr)
+        .with_ansi(false)
+        .init();
+
+    tracing::info!("Starting MCP server");
+
+    // dotenvy::dotenv()?;
     let rpc_url = env::var("ETH_RPC_URL").unwrap_or_else(|_| "default_key".to_string());
     let private_key = env::var("PRIVATE_KEY").unwrap_or_else(|_| "default_key".to_string());
-    let server = Server::new().await?;
-    server.run(rpc_url, private_key, port).await?;
+    // Create an instance of our counter router
+    let service = Mcp::new(private_key, rpc_url).serve(stdio()).await.inspect_err(|e| {
+        tracing::error!("serving error: {:?}", e);
+    })?;
+
+    service.waiting().await?;
     Ok(())
 }
+
