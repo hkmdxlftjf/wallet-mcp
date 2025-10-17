@@ -1,3 +1,148 @@
+
+## 使用说明
+
+### 前提条件
+
+- rust
+- anvil
+
+### MCP 调用示例
+
+1. get_balance请求
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "get_balance",
+    "arguments": {
+      "wallet_address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "token_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    }
+  }
+}
+```
+get_balance响应
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "1000.0 USDC"
+      }
+    ],
+    "isError": false
+  }
+}
+```
+
+2. get_token_price 请求
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tools/call",
+  "params": {
+    "name": "get_token_price",
+    "arguments": {
+      "token": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "fee": 3000
+    }
+  }
+}
+```
+get_token_price 请求
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "4036.350217 USDT"
+      }
+    ],
+    "isError": false
+  }
+}
+```
+
+3. swap_tokens 请求
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "tools/call",
+  "params": {
+    "name": "swap_tokens",
+    "arguments": {
+      "from_token": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "to_token": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+      "amount": 1.0,
+      "slippage_pct": 50,
+      "fee": 3000
+    }
+  }
+}
+```
+swap_tokens 响应
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "estimated_out: 0.03628441 WBTC | gas_price: 3628441 Gwei"
+      }
+    ],
+    "isError": false
+  }
+}
+```
+
+### MCP 配置
+
+```
+{
+  "mcpServers": {
+    "counter": {
+      "command": "PATH-TO/wallet-mcp/target/release/wallet-mcp",
+      "args": [],
+      "env": {
+        "ETH_RPC_URL": "http://localhost:8545",
+        "PRIVATE_KEY": "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+      }
+    }
+  }
+}
+```
+
+- ETH_RPC_URL 为以太坊节点地址
+- PRIVATE_KEY 为私钥地址
+
+### 本地 anvil
+
+启动
+
+```
+make anvil-start
+```
+
+停止
+
+```
+make anvil-stop
+```
+
+
+
 # Programming Assignment: Ethereum Trading MCP Server
 
 ## Overview
@@ -11,15 +156,15 @@ Build a Model Context Protocol (MCP) server in Rust that enables AI agents to qu
 Implement an MCP server with the following tools:
 
 1. **`get_balance`** - Query ETH and ERC20 token balances
-    - Input: wallet address, optional token contract address
-    - Output: balance information with proper decimals
+   - Input: wallet address, optional token contract address
+   - Output: balance information with proper decimals
 2. **`get_token_price`** - Get current token price in USD or ETH
-    - Input: token address or symbol
-    - Output: price data
+   - Input: token address or symbol
+   - Output: price data
 3. **`swap_tokens`** - Execute a token swap on Uniswap V2 or V3
-    - Input: from_token, to_token, amount, slippage tolerance
-    - Output: simulation result showing estimated output and gas costs
-    - **Important**: Construct a real Uniswap transaction and submit it to the blockchain for simulation (using `eth_call` or similar). The transaction should NOT be executed on-chain.
+   - Input: from_token, to_token, amount, slippage tolerance
+   - Output: simulation result showing estimated output and gas costs
+   - **Important**: Construct a real Uniswap transaction and submit it to the blockchain for simulation (using `eth_call` or similar). The transaction should NOT be executed on-chain.
 
 ### Technical Stack
 

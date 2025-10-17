@@ -1,8 +1,8 @@
-use serde::{Deserialize, Serialize};
-use alloy::primitives::U256;
 use alloy::primitives::utils::format_units;
-use std::fmt::{self, Display, Formatter};
+use alloy::primitives::U256;
 use rmcp::schemars;
+use serde::{Deserialize, Serialize};
+use std::fmt::{self, Display, Formatter};
 
 /// 1. 余额查询
 #[derive(Debug, Serialize, Deserialize, schemars::JsonSchema)]
@@ -13,14 +13,14 @@ pub struct GetBalanceRequest {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GetBalanceResponse {
-    pub price: MetaData
+    pub price: MetaData,
 }
 
 /// 2. 价格查询
 #[derive(Debug, Serialize, Deserialize, schemars::JsonSchema)]
 pub struct GetTokenPriceRequest {
     pub token: String, // 地址
-    pub fee: Option<u32>
+    pub fee: Option<u32>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -33,15 +33,15 @@ pub struct GetTokenPriceResponse {
 pub struct SwapTokensRequest {
     pub from_token: String, // 地址或符号
     pub to_token: String,
-    pub amount: f64, // 人类可读，例如 "0.5"
+    pub amount: f64,
     pub slippage_pct: u128,
-    pub fee: Option<u32>
+    pub fee: Option<u32>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SwapTokensResponse {
     pub estimated_out: MetaData, // 预计到手数量（已格式化）
-    pub gas_price: String,     // Gwei 字符串
+    pub gas_price: String,       // Gwei 字符串
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -51,16 +51,12 @@ pub struct MetaData {
     pub symbol: String,
 }
 
-
 impl Display for MetaData {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let format = format_units(self.value, self.decimals)
-            .unwrap_or_else(|_| "0".to_string());
+        let format = format_units(self.value, self.decimals).unwrap_or_else(|_| "0".to_string());
         write!(f, "{} {}", format, self.symbol)
     }
 }
-
-
 
 // 1. 余额
 impl Display for GetBalanceResponse {
@@ -82,8 +78,7 @@ impl Display for SwapTokensResponse {
         write!(
             f,
             "estimated_out: {} | gas_price: {} Gwei",
-            self.estimated_out,
-            self.gas_price,
+            self.estimated_out, self.gas_price,
         )
     }
 }
