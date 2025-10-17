@@ -7,21 +7,26 @@ edition = "2021"
 name = "wallet-mcp"
 path = "src/main.rs"
 
-[[example]]
-name = "chainlink_test"
-path = "examples/chainlink_test.rs"
+# 示例程序
+# [[example]]
+# name = "chainlink_test"
+# path = "examples/chainlink_test.rs"
 
-[[example]]
-name = "swap_test"
-path = "examples/swap_test.rs"
+# [[example]]
+# name = "swap_test"
+# path = "examples/swap_test.rs"
 
-[[example]]
-name = "simple_swap_test"
-path = "examples/simple_swap_test.rs"
+# [[example]]
+# name = "simple_swap_test"
+# path = "examples/simple_swap_test.rs"
 
-[[example]]
-name = "local_test"
-path = "examples/local_test.rs"
+# [[example]]
+# name = "local_test"
+# path = "examples/local_test.rs"
+
+[lib]
+name = "wallet_mcp"
+path = "src/lib.rs"
 
 [dependencies]
 tokio = { version = "1.48.0", features = ["full"] }
@@ -47,3 +52,8 @@ tracing-subscriber = { version = "0.3", features = [
     "fmt",
 ] }
 tracing = "0.1.41"
+futures = "0.3.31"
+
+[dev-dependencies]
+tokio-test = "0.4"
+mockall = "0.12"
